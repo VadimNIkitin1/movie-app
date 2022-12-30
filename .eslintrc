@@ -38,6 +38,11 @@
     "react/button-has-type": "off",
     "react/state-in-constructor": "off",
     "no-plusplus": "off",
+    "no-console": "off",
+    "no-underscore-dangle": "off",
+    "no-return-await": "off",
+    "arrow-body-style": "off",
+    "class-methods-use-this": "off",
     "react/jsx-props-no-spreading": "off",
     "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
@@ -49,14 +54,7 @@
     "import/order": [
       2,
       {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index"
-        ],
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
         "newlines-between": "always"
       }
     ]
