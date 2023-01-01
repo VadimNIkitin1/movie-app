@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 
-import MovieAppService from '../Services/MovieAppService';
+import MovieAppService from '../../Services/MovieAppService';
+import CardMovie from '../CardMovie.css/CardMovie';
 
-import CardMovie from './CardMovie';
+import './ListMovie.css';
 
 export default class ListMovie extends Component {
   movieService = new MovieAppService();
@@ -27,6 +28,6 @@ export default class ListMovie extends Component {
   }
 
   render() {
-    return <div>{this.moviesList()}</div>;
+    return <div className="list-movie">{this.moviesList()}</div>;
   }
 }

@@ -43,7 +43,6 @@ export default class MovieAppService {
 
   async getGenres() {
     const res = await this.getResource(this._apiGenre);
-
     return res.genres;
   }
 
