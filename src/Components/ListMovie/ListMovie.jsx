@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Spin, Alert } from 'antd';
 
 import MovieAppService from '../../Services/MovieAppService';
 import CardMovie from '../CardMovie.css/CardMovie';
@@ -10,12 +11,33 @@ export default class ListMovie extends Component {
 
   state = {
     movies: [],
+    loading: true,
+    error: null,
   };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.fetchMovies();
+  }
+
+  async fetchMovies() {
     this.setState({
-      movies: await this.movieService.getAllMovie(1),
+      loading: true,
     });
+
+    try {
+      const movies = await this.movieService.getAllMovie();
+      this.setState({
+        movies,
+      });
+    } catch (err) {
+      this.setState({
+        error: err,
+      });
+    } finally {
+      this.setState({
+        loading: false,
+      });
+    }
   }
 
   moviesList() {
@@ -28,6 +50,15 @@ export default class ListMovie extends Component {
   }
 
   render() {
+    const { loading, error } = this.state;
+
+    if (loading) {
+      return <Spin tip="Loading" size="large" className="spin" />;
+    }
+
+    if (error) {
+      return <Alert message="Error Text" description={error.message} type="error" closable />;
+    }
     return <div className="list-movie">{this.moviesList()}</div>;
   }
 }

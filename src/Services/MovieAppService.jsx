@@ -31,7 +31,7 @@ export default class MovieAppService {
       result.push({
         id: elem.id,
         title: elem.original_title,
-        release: elem.release_date,
+        release: new Date(elem.release_date),
         overview: elem.overview,
         genre: this.getGenreNames(elem.genre_ids),
         imageURL: this._apiImg + elem.poster_path,
