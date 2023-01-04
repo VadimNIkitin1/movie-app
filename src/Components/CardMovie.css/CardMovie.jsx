@@ -31,7 +31,7 @@ export default class CardMovie extends Component {
         </div>
         <div className="description">
           <h1 className="title">{title}</h1>
-          <p className="release">{format(release, 'MMMM d, yyyy')}</p>
+          <p className="release">{release ? format(release, 'MMMM d, yyyy') : ''}</p>
           <div className="genre">{this.getGenre()}</div>
           <p className="overview">{textCut(overview, 120)}...</p>
         </div>

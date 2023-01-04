@@ -10,6 +10,10 @@ body {
   background-color: #fff;
 }
 
+.input {
+  margin: 19px 0 34px 0;
+}
+
 @media screen and (max-width: 1200px) {
   .app {
     width: 992px;

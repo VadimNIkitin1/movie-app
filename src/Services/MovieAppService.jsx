@@ -16,29 +16,32 @@ export default class MovieAppService {
     if (!res.ok) {
       throw new Error(`Could not fetch ${url}, received ${res.status}`);
     }
+
     return await res.json();
   }
 
-  async getAllMovie(page) {
-    const res = await this.getResource(`${this._apiMovies}&query=return&page=${page}`);
-    const result = [];
+  async getAllMovies(query, page = 1) {
+    const res = await this.getResource(`${this._apiMovies}&query=${query}&page=${page}`);
+    const movies = [];
 
     if (!this._genres) {
       this._genres = await this.getGenres();
     }
 
     res.results.forEach((elem) => {
-      result.push({
+      movies.push({
         id: elem.id,
         title: elem.original_title,
-        release: new Date(elem.release_date),
+        release: elem.release_date ? new Date(elem.release_date) : null,
         overview: elem.overview,
         genre: this.getGenreNames(elem.genre_ids),
         imageURL: this._apiImg + elem.poster_path,
       });
     });
-
-    return result;
+    return {
+      movies,
+      totalPages: res.total_pages,
+    };
   }
 
   async getGenres() {
