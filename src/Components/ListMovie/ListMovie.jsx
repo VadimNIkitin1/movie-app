@@ -23,6 +23,10 @@ export default class ListMovie extends Component {
       return <Spin tip="Loading" size="large" className="spin" />;
     }
 
+    if (movies.length === 0) {
+      return <Alert message="No movies found for your search" type="success" />;
+    }
+
     if (error) {
       return <Alert message="Error Text" description={error.message} type="error" closable />;
     }

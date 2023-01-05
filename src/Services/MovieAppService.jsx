@@ -36,6 +36,7 @@ export default class MovieAppService {
         overview: elem.overview,
         genre: this.getGenreNames(elem.genre_ids),
         imageURL: this._apiImg + elem.poster_path,
+        voteAverage: elem.vote_average,
       });
     });
     return {

@@ -98,7 +98,7 @@ export default class App extends Component {
     return (
       <Layout className="app">
         <Header style={headerFooterStyle}>
-          <Menu mode="horizontal" items={items} className="menu" />
+          <Menu mode="horizontal" items={items} className="menu" selectedKeys={['search']} />
         </Header>
         <Content>
           <Input placeholder="Type to search..." className="input" value={label} onChange={this.onLabelChange} />
