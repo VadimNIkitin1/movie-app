@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Layout, Menu, Pagination, Input } from 'antd';
+import { Layout, Tabs, Pagination, Input } from 'antd';
 import debounce from 'lodash.debounce';
 
 import 'antd/dist/reset.css';
@@ -37,11 +37,15 @@ export default class App extends Component {
     label: '',
   };
 
-  // async componentDidMount() {
-  //   await this.fetchMovies('return', 1);
-  // }
-
   debouceReq = debounce(this.fetchMovies, 800);
+
+  async componentDidMount() {
+    const id = localStorage.getItem('id');
+    if (!id) {
+      localStorage.setItem('id', await this.createGuestSession());
+    }
+    await this.fetchRatedMovies();
+  }
 
   onLabelChange = (e) => {
     const { value } = e.target;
@@ -49,7 +53,6 @@ export default class App extends Component {
       label: value,
       currentPage: 1,
     });
-
     this.debouceReq(value, 1);
   };
 
@@ -57,10 +60,20 @@ export default class App extends Component {
     this.setState({
       currentPage: page,
     });
-
     const { label } = this.state;
-
     this.debouceReq(label, page);
+  };
+
+  addRate = async (id, value) => {
+    const rated = JSON.parse(localStorage.getItem('rated')) || {};
+    if (value > 0) {
+      rated[id] = value;
+      await this.movieService.addRate(id, value);
+    } else {
+      delete rated[id];
+      await this.movieService.deleteRate(id);
+    }
+    localStorage.setItem('rated', JSON.stringify(rated));
   };
 
   async fetchMovies(query, page = 1) {
@@ -93,12 +106,22 @@ export default class App extends Component {
     }
   }
 
+  async fetchRatedMovies() {
+    const res = await this.movieService.getRatedMovies();
+    return res;
+  }
+
+  async createGuestSession() {
+    const res = await this.movieService.getSessionId();
+    return res;
+  }
+
   render() {
     const { movies, totalPages, currentPage, loading, error, label } = this.state;
     return (
       <Layout className="app">
         <Header style={headerFooterStyle}>
-          <Menu mode="horizontal" items={items} className="menu" selectedKeys={['search']} />
+          <Tabs mode="horizontal" items={items} className="menu" selectedKeys={['search']} />
         </Header>
         <Content>
           <Input placeholder="Type to search..." className="input" value={label} onChange={this.onLabelChange} />
@@ -108,6 +131,7 @@ export default class App extends Component {
               loading,
               error,
             }}
+            addRate={this.addRate}
           />
         </Content>
         <Footer style={headerFooterStyle}>

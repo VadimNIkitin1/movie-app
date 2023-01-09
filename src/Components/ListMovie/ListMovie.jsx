@@ -7,10 +7,11 @@ import './ListMovie.css';
 
 export default class ListMovie extends Component {
   moviesList(movies) {
+    const { addRate } = this.props;
     const result = [];
     if (movies) {
       movies.forEach((elem) => {
-        result.push(<CardMovie data={elem} key={elem.id} />);
+        result.push(<CardMovie data={elem} key={elem.id} addRate={addRate} />);
       });
     }
     return result;

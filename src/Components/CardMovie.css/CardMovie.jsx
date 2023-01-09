@@ -7,6 +7,19 @@ import { textCut } from '../../Utilities/text';
 import './CardMovie.css';
 
 export default class CardMovie extends Component {
+  state = {
+    rateValue: 0,
+  };
+
+  componentDidMount() {
+    const { data } = this.props;
+    const rated = JSON.parse(localStorage.getItem('rated')) || {};
+    const value = rated[data.id] || 0;
+    this.setState({
+      rateValue: value,
+    });
+  }
+
   getGenre() {
     const { data } = this.props;
     const result = [];
@@ -20,6 +33,14 @@ export default class CardMovie extends Component {
 
     return result;
   }
+
+  onRateChange = (rate) => {
+    const { data, addRate } = this.props;
+    this.setState({
+      rateValue: rate,
+    });
+    addRate(data.id, rate);
+  };
 
   selectVoteAverage(average) {
     switch (true) {
@@ -35,6 +56,7 @@ export default class CardMovie extends Component {
   }
 
   render() {
+    const { rateValue } = this.state;
     const { data } = this.props;
     const { title, release, overview, imageURL, voteAverage } = data;
 
@@ -52,8 +74,8 @@ export default class CardMovie extends Component {
           </div>
           <p className="release">{release ? format(release, 'MMMM d, yyyy') : ''}</p>
           <div className="genre">{this.getGenre()}</div>
-          <p className="overview">{textCut(overview, 120)}...</p>
-          <Rate className="rate" />
+          <p className="overview">{textCut(overview, 180)}...</p>
+          <Rate allowHalf className="rate" count={10} value={rateValue} onChange={this.onRateChange} />
         </div>
       </div>
     );

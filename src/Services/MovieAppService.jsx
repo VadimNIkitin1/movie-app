@@ -11,17 +11,18 @@ export default class MovieAppService {
 
   _genres = undefined;
 
-  async getResource(url) {
-    const res = await fetch(url);
-    if (!res.ok) {
-      throw new Error(`Could not fetch ${url}, received ${res.status}`);
-    }
+  _apiGuestSession = `${this._apiBase}/authentication/guest_session/new?api_key=${this._apiKey}`;
 
+  async requestResource(url, options) {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      throw new Error(`Could not request ${url}, received ${res.status}`);
+    }
     return await res.json();
   }
 
   async getAllMovies(query, page = 1) {
-    const res = await this.getResource(`${this._apiMovies}&query=${query}&page=${page}`);
+    const res = await this.requestResource(`${this._apiMovies}&query=${query}&page=${page}`);
     const movies = [];
 
     if (!this._genres) {
@@ -45,9 +46,22 @@ export default class MovieAppService {
     };
   }
 
+  async getRatedMovies() {
+    const obj = localStorage.getItem('id');
+    const res = await this.requestResource(
+      `${this._apiBase}/guest_session/${obj}/rated/movies?api_key=${this._apiKey}`
+    );
+    return res;
+  }
+
   async getGenres() {
-    const res = await this.getResource(this._apiGenre);
+    const res = await this.requestResource(this._apiGenre);
     return res.genres;
+  }
+
+  async getSessionId() {
+    const res = await this.requestResource(this._apiGuestSession);
+    return res.guest_session_id;
   }
 
   getGenreNames(ids) {
@@ -56,5 +70,32 @@ export default class MovieAppService {
 
   getGenreName(id) {
     return this._genres.filter((genre) => genre.id === id)[0].name;
+  }
+
+  async addRate(id, value) {
+    const res = await this.requestResource(
+      `${this._apiBase}/movie/${id}/rating?api_key=${this._apiKey}&guest_session_id=${localStorage.getItem('id')}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ value }),
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+      }
+    );
+    return res;
+  }
+
+  async deleteRate(id) {
+    const res = await this.requestResource(
+      `${this._apiBase}/movie/${id}/rating?guest_session_id=${localStorage.getItem('id')}&api_key=${this._apiKey}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8',
+        },
+      }
+    );
+    return res;
   }
 }
