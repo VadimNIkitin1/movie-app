@@ -1,20 +1,14 @@
 import React, { Component } from 'react';
 import { Spin, Alert } from 'antd';
 
-import CardMovie from '../CardMovie.css/CardMovie';
+import CardMovie from '../CardMovie/CardMovie';
 
 import './ListMovie.css';
 
 export default class ListMovie extends Component {
   moviesList(movies) {
     const { addRate } = this.props;
-    const result = [];
-    if (movies) {
-      movies.forEach((elem) => {
-        result.push(<CardMovie data={elem} key={elem.id} addRate={addRate} />);
-      });
-    }
-    return result;
+    return movies.map((elem) => <CardMovie data={elem} key={elem.id} addRate={addRate} />);
   }
 
   render() {

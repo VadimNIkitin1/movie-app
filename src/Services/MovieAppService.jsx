@@ -37,7 +37,7 @@ export default class MovieAppService {
         overview: elem.overview,
         genre: this.getGenreNames(elem.genre_ids),
         imageURL: this._apiImg + elem.poster_path,
-        voteAverage: elem.vote_average,
+        voteAverage: elem.vote_average.toFixed(1),
       });
     });
     return {
@@ -51,7 +51,26 @@ export default class MovieAppService {
     const res = await this.requestResource(
       `${this._apiBase}/guest_session/${obj}/rated/movies?api_key=${this._apiKey}`
     );
-    return res;
+
+    const movies = [];
+
+    if (!this._genres) {
+      this._genres = await this.getGenres();
+    }
+
+    res.results.forEach((elem) => {
+      movies.push({
+        id: elem.id,
+        title: elem.original_title,
+        release: elem.release_date ? new Date(elem.release_date) : null,
+        overview: elem.overview,
+        genre: this.getGenreNames(elem.genre_ids),
+        imageURL: this._apiImg + elem.poster_path,
+        voteAverage: elem.vote_average.toFixed(1),
+      });
+    });
+    console.log(movies);
+    return movies;
   }
 
   async getGenres() {

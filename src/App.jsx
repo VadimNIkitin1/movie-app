@@ -6,6 +6,7 @@ import debounce from 'lodash.debounce';
 import 'antd/dist/reset.css';
 import ListMovie from './Components/ListMovie/ListMovie';
 import MovieAppService from './Services/MovieAppService';
+import RatedMovies from './Components/RatedMovies/RatedMovies';
 
 const { Header, Footer, Content } = Layout;
 const items = [
@@ -35,6 +36,7 @@ export default class App extends Component {
     loading: false,
     error: null,
     label: '',
+    tab: true,
   };
 
   debouceReq = debounce(this.fetchMovies, 800);
@@ -44,8 +46,20 @@ export default class App extends Component {
     if (!id) {
       localStorage.setItem('id', await this.createGuestSession());
     }
-    await this.fetchRatedMovies();
   }
+
+  onChangeTab = () => {
+    const { tab } = this.state;
+    if (tab) {
+      this.setState({
+        tab: false,
+      });
+    } else {
+      this.setState({
+        tab: true,
+      });
+    }
+  };
 
   onLabelChange = (e) => {
     const { value } = e.target;
@@ -106,28 +120,41 @@ export default class App extends Component {
     }
   }
 
-  async fetchRatedMovies() {
-    const res = await this.movieService.getRatedMovies();
-    return res;
-  }
-
   async createGuestSession() {
     const res = await this.movieService.getSessionId();
     return res;
   }
 
   render() {
-    const { movies, totalPages, currentPage, loading, error, label } = this.state;
-    return (
+    const { movies, totalPages, currentPage, loading, error, label, tab } = this.state;
+    return tab ? (
       <Layout className="app">
         <Header style={headerFooterStyle}>
-          <Tabs mode="horizontal" items={items} className="menu" selectedKeys={['search']} />
+          <Tabs mode="horizontal" items={items} className="menu" onChange={this.onChangeTab} />
         </Header>
         <Content>
           <Input placeholder="Type to search..." className="input" value={label} onChange={this.onLabelChange} />
           <ListMovie
             data={{
               movies,
+              loading,
+              error,
+            }}
+            addRate={this.addRate}
+          />
+        </Content>
+        <Footer style={headerFooterStyle}>
+          <Pagination defaultCurrent={1} total={totalPages} current={currentPage} onChange={this.onChangePage} />
+        </Footer>
+      </Layout>
+    ) : (
+      <Layout className="app">
+        <Header style={headerFooterStyle}>
+          <Tabs mode="horizontal" items={items} className="menu" onChange={this.onChangeTab} />
+        </Header>
+        <Content>
+          <RatedMovies
+            data={{
               loading,
               error,
             }}
