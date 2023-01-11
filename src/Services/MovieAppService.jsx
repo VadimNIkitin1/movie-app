@@ -42,14 +42,14 @@ export default class MovieAppService {
     });
     return {
       movies,
-      totalPages: res.total_pages,
+      totalPages: res.total_results,
     };
   }
 
-  async getRatedMovies() {
+  async getRatedMovies(page = 1) {
     const obj = localStorage.getItem('id');
     const res = await this.requestResource(
-      `${this._apiBase}/guest_session/${obj}/rated/movies?api_key=${this._apiKey}`
+      `${this._apiBase}/guest_session/${obj}/rated/movies?api_key=${this._apiKey}&page=${page}`
     );
 
     const movies = [];
@@ -69,8 +69,11 @@ export default class MovieAppService {
         voteAverage: elem.vote_average.toFixed(1),
       });
     });
-    console.log(movies);
-    return movies;
+    console.log(res);
+    return {
+      movies,
+      totalPages: res.total_results,
+    };
   }
 
   async getGenres() {

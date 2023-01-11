@@ -31,8 +31,11 @@ export default class App extends Component {
 
   state = {
     movies: [],
+    ratedMovies: [],
     totalPages: null,
     currentPage: 1,
+    currentRatedPage: 1,
+    totalRatedPage: null,
     loading: false,
     error: null,
     label: '',
@@ -51,6 +54,7 @@ export default class App extends Component {
   onChangeTab = () => {
     const { tab } = this.state;
     if (tab) {
+      this.fetchRatedMovies();
       this.setState({
         tab: false,
       });
@@ -59,6 +63,13 @@ export default class App extends Component {
         tab: true,
       });
     }
+  };
+
+  onRatedChangePage = (page) => {
+    this.setState({
+      currentPage: page,
+    });
+    this.fetchRatedMovies(page);
   };
 
   onLabelChange = (e) => {
@@ -80,12 +91,16 @@ export default class App extends Component {
 
   addRate = async (id, value) => {
     const rated = JSON.parse(localStorage.getItem('rated')) || {};
-    if (value > 0) {
-      rated[id] = value;
-      await this.movieService.addRate(id, value);
-    } else {
-      delete rated[id];
-      await this.movieService.deleteRate(id);
+    try {
+      if (value > 0) {
+        await this.movieService.addRate(id, value);
+        rated[id] = value;
+      } else {
+        await this.movieService.deleteRate(id);
+        delete rated[id];
+      }
+    } catch (err) {
+      console.error(err);
     }
     localStorage.setItem('rated', JSON.stringify(rated));
   };
@@ -103,8 +118,8 @@ export default class App extends Component {
       loading: true,
     });
 
-    const res = await this.movieService.getAllMovies(query, page);
     try {
+      const res = await this.movieService.getAllMovies(query, page);
       this.setState({
         movies: res.movies,
         totalPages: res.totalPages,
@@ -120,13 +135,46 @@ export default class App extends Component {
     }
   }
 
+  async fetchRatedMovies(page) {
+    this.setState({
+      currentRatedPage: page,
+    });
+    try {
+      const res = await this.movieService.getRatedMovies(page);
+      this.setState({
+        totalRatedPage: res.totalPages,
+        ratedMovies: res.movies,
+      });
+    } catch (err) {
+      this.setState({
+        error: err,
+      });
+    }
+  }
+
   async createGuestSession() {
-    const res = await this.movieService.getSessionId();
+    let res = [];
+    try {
+      res = await this.movieService.getSessionId();
+    } catch (err) {
+      console.error(err);
+    }
     return res;
   }
 
   render() {
-    const { movies, totalPages, currentPage, loading, error, label, tab } = this.state;
+    const {
+      movies,
+      ratedMovies,
+      totalPages,
+      totalRatedPage,
+      currentPage,
+      currentRatedPage,
+      loading,
+      error,
+      label,
+      tab,
+    } = this.state;
     return tab ? (
       <Layout className="app">
         <Header style={headerFooterStyle}>
@@ -144,7 +192,13 @@ export default class App extends Component {
           />
         </Content>
         <Footer style={headerFooterStyle}>
-          <Pagination defaultCurrent={1} total={totalPages} current={currentPage} onChange={this.onChangePage} />
+          <Pagination
+            defaultCurrent={1}
+            total={totalPages}
+            current={currentPage}
+            onChange={this.onChangePage}
+            pageSize={20}
+          />
         </Footer>
       </Layout>
     ) : (
@@ -155,6 +209,7 @@ export default class App extends Component {
         <Content>
           <RatedMovies
             data={{
+              ratedMovies,
               loading,
               error,
             }}
@@ -162,7 +217,13 @@ export default class App extends Component {
           />
         </Content>
         <Footer style={headerFooterStyle}>
-          <Pagination defaultCurrent={1} total={totalPages} current={currentPage} onChange={this.onChangePage} />
+          <Pagination
+            defaultCurrent={1}
+            total={totalRatedPage}
+            current={currentRatedPage}
+            onChange={this.onRatedChangePage}
+            pageSize={20}
+          />
         </Footer>
       </Layout>
     );
